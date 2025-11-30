@@ -1,6 +1,7 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { ProductService } from '../../services/product';
 import { Product } from '../../common/product';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-product-list',
@@ -9,17 +10,31 @@ import { Product } from '../../common/product';
   styleUrl: './product-list.css',
 })
 export class ProductList {
-  private productService = inject(ProductService);
-
   products = signal<Product[]>([]);
+  currentCategoryId = signal<number>(1);
 
-  constructor() {
-    this.listProducts();
+  constructor(
+    private productService: ProductService,
+    private route: ActivatedRoute,
+  ) {
+    this.route.paramMap.subscribe(() => {
+      this.listProducts();
+    });
   }
 
   listProducts() {
-    this.productService.getProductList().subscribe((data) => {
-      this.products.set(data);
-    });
+    const hasCategoryId = this.route.snapshot.paramMap.has('id');
+
+    if (hasCategoryId) {
+      this.currentCategoryId.set(+this.route.snapshot.paramMap.get('id')!);
+    } else {
+      this.currentCategoryId.set(1);
+    }
+
+    this.productService
+      .getProductList(this.currentCategoryId())
+      .subscribe((data) => {
+        this.products.set(data);
+      });
   }
 }

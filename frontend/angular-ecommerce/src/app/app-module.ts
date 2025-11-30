@@ -9,10 +9,19 @@ import {
   withInterceptorsFromDi,
 } from '@angular/common/http';
 import { ProductService } from './services/product';
+import { RouterModule, Routes } from '@angular/router';
+
+const routes: Routes = [
+  { path: 'category/:id', component: ProductList },
+  { path: 'category', component: ProductList },
+  { path: 'products', component: ProductList },
+  { path: '', redirectTo: '/products', pathMatch: 'full' },
+  { path: '**', redirectTo: '/products', pathMatch: 'full' },
+];
 
 @NgModule({
   declarations: [App, ProductList],
-  imports: [BrowserModule, AppRoutingModule],
+  imports: [RouterModule.forRoot(routes), BrowserModule, AppRoutingModule],
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideHttpClient(withInterceptorsFromDi()),
