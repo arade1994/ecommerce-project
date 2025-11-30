@@ -12,6 +12,7 @@ import { ActivatedRoute } from '@angular/router';
 export class ProductList {
   products = signal<Product[]>([]);
   currentCategoryId = signal<number>(1);
+  currentCategoryName = signal<string>('');
 
   constructor(
     private productService: ProductService,
