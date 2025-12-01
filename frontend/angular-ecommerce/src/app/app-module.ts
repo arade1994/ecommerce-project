@@ -12,8 +12,10 @@ import { ProductService } from './services/product';
 import { RouterModule, Routes } from '@angular/router';
 import { ProductCategoryMenu } from './components/product-category-menu/product-category-menu';
 import { Search } from './components/search/search';
+import { ProductDetails } from './components/product-details/product-details';
 
 const routes: Routes = [
+  { path: 'products/:id', component: ProductDetails },
   { path: 'search/:keyword', component: ProductList },
   { path: 'category/:id', component: ProductList },
   { path: 'category', component: ProductList },
@@ -23,7 +25,7 @@ const routes: Routes = [
 ];
 
 @NgModule({
-  declarations: [App, ProductList, ProductCategoryMenu, Search],
+  declarations: [App, ProductList, ProductCategoryMenu, Search, ProductDetails],
   imports: [RouterModule.forRoot(routes), BrowserModule, AppRoutingModule],
   providers: [
     provideBrowserGlobalErrorListeners(),
