@@ -11,8 +11,13 @@ import { ActivatedRoute } from '@angular/router';
 })
 export class ProductList {
   products = signal<Product[]>([]);
+  previousCategoryId = signal<number>(1);
   currentCategoryId = signal<number>(1);
   searchMode = signal<boolean>(false);
+  pageNumber = signal<number>(1);
+  pageSize = signal<number>(10);
+  totalElements = signal<number>(0);
+  previousKeyword = signal<string>('');
 
   constructor(
     private productService: ProductService,
@@ -35,9 +40,16 @@ export class ProductList {
 
   handleSearchProducts() {
     const keyword = this.route.snapshot.paramMap.get('keyword')!;
-    this.productService.searchProducts(keyword).subscribe((data) => {
-      this.products.set(data);
-    });
+
+    if (this.previousKeyword() !== keyword) {
+      this.pageNumber.set(1);
+    }
+
+    this.previousKeyword.set(keyword);
+
+    this.productService
+      .searchProductsPaginate(this.pageNumber() - 1, this.pageSize(), keyword)
+      .subscribe(this.processResult());
   }
 
   handleListProducts() {
@@ -49,10 +61,33 @@ export class ProductList {
       this.currentCategoryId.set(1);
     }
 
+    if (this.previousCategoryId() !== this.currentCategoryId()) {
+      this.pageNumber.set(1);
+    }
+
+    this.previousCategoryId.set(this.currentCategoryId());
+
     this.productService
-      .getProductList(this.currentCategoryId())
-      .subscribe((data) => {
-        this.products.set(data);
-      });
+      .getProductListPaginate(
+        this.pageNumber() - 1,
+        this.pageSize(),
+        this.currentCategoryId(),
+      )
+      .subscribe(this.processResult());
+  }
+
+  updatePageSize(pageSize: string) {
+    this.pageSize.set(+pageSize);
+    this.pageNumber.set(1);
+    this.listProducts();
+  }
+
+  processResult() {
+    return (data: any) => {
+      this.products.set(data._embedded.products);
+      this.pageNumber.set(data.page.number + 1);
+      this.pageSize.set(data.page.size);
+      this.totalElements.set(data.page.totalElements);
+    };
   }
 }
